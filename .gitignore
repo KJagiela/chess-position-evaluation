@@ -8,3 +8,6 @@ data/
 .cache
 *.ipynb
 __pycache__
+venv/
+dist/
+.idea/
