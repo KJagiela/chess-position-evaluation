@@ -28,9 +28,9 @@ pip install -r requirements.txt
 To translate PGN file into tensor-like data (coordinates and values of non-zero tensor entries + game metadata):
 
 ```python
-from common.readers import PgnReader as reader
-from common.io import FileSystemDataSaverWithShuffling as saver
-from common.transformations import DataSpecs
+from poseval.common.io import PgnReader as reader
+from poseval.common.io import FileSystemDataSaverWithShuffling as saver
+from poseval.common.transformations import DataSpecs
 
 # memory_size indicates how many prev moves to keep
 with reader("data.pgn", memory_size = 5) as r, saver('output', chunk_size = 5000, number_of_buckets=50) as s:
@@ -48,9 +48,9 @@ with reader("data.pgn", memory_size = 5) as r, saver('output', chunk_size = 5000
 
 To later use tensor-like data to train chess value network:
 ```python
-from common.io import FlatVector6x8x8PositionReader
-from common.models import FeedForwardNetwork
-from training.trainers import ValueNetworkTrainer
+from poseval.common.io import FlatVector6x8x8PositionReader
+from poseval.common.models import FeedForwardNetwork
+from poseval.training.trainers import ValueNetworkTrainer
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import Variable
