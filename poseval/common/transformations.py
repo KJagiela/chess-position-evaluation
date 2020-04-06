@@ -2,6 +2,10 @@ from typing import Union
 import numpy as np
 
 
+class MalformedFenstringError(Exception):
+    pass
+
+
 class DataSpecs:
     tensor6x8x8_sparse = 'tensor6x8x8'
     vector6x8x8_flat = 'vector6x8x8'
@@ -40,6 +44,11 @@ class Fen:
     def __init__(self, fenstring):
         self.elems = fenstring.split(" ")
         self.fenstring = fenstring
+        self.validate_fenstring()
+
+    def validate_fenstring(self):
+        if len(self.elems) != 6:
+            raise MalformedFenstringError
 
     def can_castle_white_king(self):
         return 'K' in self.elems[2]
@@ -172,13 +181,16 @@ class Fen:
     def en_passant_vector_8x8x1(self):
         board = np.zeros([8, 8, 1])
         if self.en_passant_target_square():
-            board[(*DataSpecs.string_square_to_8x8(self.en_passant_target_square), 0)] = 1
+            board[(*DataSpecs.string_square_to_8x8(self.en_passant_target_square()), 0)] = 1
         return board
 
     def full_board_representation(self, dim):
-        return np.dstack((self.sparse_to_dense(dim), self.castling_vector_8x8x2, self.en_passant_vector_8x8x1))
+        return np.dstack(
+            (self.pieces_dense_representation(dim),
+             self.castling_vector_8x8x2(),
+             self.en_passant_vector_8x8x1()))
 
-    def sparse_to_dense(self, dim):
+    def pieces_dense_representation(self, dim):
         board = np.zeros([8, 8, dim])
         if dim == 6:
             index_dict = self.raw_board_to_6x8x8_sparse_representation()
