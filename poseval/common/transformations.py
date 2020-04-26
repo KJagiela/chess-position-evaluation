@@ -1,8 +1,13 @@
-from typing import Union
+import re
+
 import numpy as np
 
 
 class MalformedFenstringError(Exception):
+    pass
+
+
+class AlreadyWhiteError(Exception):
     pass
 
 
@@ -32,11 +37,12 @@ class DataSpecs:
         'r': 1, 'R': 1, 'q': 1, 'Q': 1, 'k': 1, 'K': 1
     }
 
-    line_dict = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
+    col_num_dict = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
+    num_col_dict = {value: key for key, value in col_num_dict.items()}  # reversed line_num_dict
 
     @staticmethod
     def string_square_to_8x8(str_square: str):
-        return int(str_square[1]) - 1, DataSpecs.line_dict[str_square[0]]
+        return int(str_square[1]) - 1, DataSpecs.col_num_dict[str_square[0]]
 
 
 class Fen:
@@ -111,20 +117,45 @@ class Fen:
             DataSpecs.piece2layer_for_12x8x8_tensor, DataSpecs.piece2value_for_12x8x8_tensor, 12
         )
 
-    def flip_position(self):
-        self.elems[0] = "".join(reversed([self._reverse_piece(piece) for piece in self.elems[0]]))
-
-    def flip_castling(self):
-        tmp_color_changed = [self._reverse_piece(piece) for piece in self.elems[2]]
-        self.elems[2] = "".join(sorted(tmp_color_changed))
-
     def flip(self):
-        self.elems[1] = 'w' if self.next_to_move() == 'b' else 'b'
+        self.elems[1] = 'w' if self.elems[1] == 'b' else 'b'
         self.flip_position()
         self.flip_castling()
+        self.flip_en_passant()
         self.fenstring = " ".join(self.elems)
 
-    def _reverse_piece(self, piece):
+    def flip_position(self):
+        self.elems[0] = "/".join(
+            [''.join([self._reverse_piece(piece) for piece in line]) for line in self.elems[0].split("/")[::-1]]
+        )
+
+    def flip_castling(self):
+        if self.elems[2] == '-':
+            pass
+        else:
+            new_castling_string = ''
+            for el in 'kqKQ':
+                if el in self.elems[2]:
+                    new_castling_string += self._reverse_piece(el)
+            self.elems[2] = new_castling_string
+
+    def flip_en_passant(self):
+        if self.elems[3] == '-':
+            pass
+        else:  # otherwise, it's a square
+            curr_column, curr_line = self.elems[3]
+            new_col = 8 - DataSpecs.col_num_dict[curr_column]
+            new_line = 8 - int(curr_line) + 1  # add 1, because line numbers start at 1
+            self.elems[3] = DataSpecs.num_col_dict[new_col] + str(new_line)
+
+    @staticmethod
+    def reverse_square(square):
+        return
+
+    @staticmethod
+    def _reverse_piece(piece):
+        if piece not in 'pPnNbBrRqQkK':
+            return piece
         if piece.islower():
             return piece.upper()
         if piece.isupper():
@@ -185,6 +216,8 @@ class Fen:
         return board
 
     def full_board_representation(self, dim):
+        if dim == 6:
+            raise NotImplementedError  # TODO
         return np.dstack(
             (self.pieces_dense_representation(dim),
              self.castling_vector_8x8x2(),
@@ -198,9 +231,7 @@ class Fen:
             index_dict = self.raw_board_to_12x8x8_sparse_representation()
         else:
             raise ValueError('Dimension not supported')
-        for coordinates in zip(index_dict['indices_x'], index_dict['indices_y'], index_dict['indices_z']):
-            board[coordinates] = 1
+        coordinates_list = zip(index_dict['indices_x'], index_dict['indices_y'], index_dict['indices_z'])
+        for coordinates, value in zip(coordinates_list, index_dict['values']):
+            board[coordinates] = value
         return board
-
-    def flip_color(self, full_representation):
-        return np.flip(full_representation, 0)
