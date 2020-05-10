@@ -148,14 +148,13 @@ class Fen:
         return
 
     @staticmethod
-    def _reverse_piece(piece):
-        if piece not in 'pPnNbBrRqQkK':
-            return piece
-        if piece.islower():
-            return piece.upper()
-        if piece.isupper():
-            return piece.lower()
-        return piece
+    def _reverse_piece(fen_el):
+        if not isinstance(fen_el, str):
+            return fen_el
+        elif fen_el.islower():  # it's a black piece make it white
+            return fen_el.upper()
+        else:  # piece.isupper(), so it's a white piece, make it black
+            return fen_el.lower()
 
     def _raw_board_to_sparse_representation(self, piece_to_layer_map, piece_to_value_map, layers):
         raw_board = self.raw_board()
