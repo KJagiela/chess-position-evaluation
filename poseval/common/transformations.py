@@ -54,7 +54,7 @@ class Fen:
 
     def validate_fenstring(self):
         if len(self.elems) != 6:
-            raise MalformedFenstringError
+            raise MalformedFenStringError
 
     def can_castle_white_king(self):
         return 'K' in self.elems[2]
