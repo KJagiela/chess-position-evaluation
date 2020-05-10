@@ -1,5 +1,3 @@
-import re
-
 import numpy as np
 
 
@@ -37,16 +35,14 @@ class DataSpecs:
         'r': 1, 'R': 1, 'q': 1, 'Q': 1, 'k': 1, 'K': 1
     }
 
-    col_num_dict = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
-    num_col_dict = {value: key for key, value in col_num_dict.items()}  # reversed line_num_dict
+    col_list = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
 
     @staticmethod
     def string_square_to_8x8(str_square: str):
-        return int(str_square[1]) - 1, DataSpecs.col_num_dict[str_square[0]]
+        return int(str_square[1]) - 1, DataSpecs.col_list.index(str_square[0])
 
 
 class Fen:
-
     def __init__(self, fenstring):
         self.elems = fenstring.split(" ")
         self.fenstring = fenstring
@@ -144,9 +140,9 @@ class Fen:
             pass
         else:  # otherwise, it's a square
             curr_column, curr_line = self.elems[3]
-            new_col = 8 - DataSpecs.col_num_dict[curr_column]
+            new_col = 8 - DataSpecs.col_list.index(curr_column)
             new_line = 8 - int(curr_line) + 1  # add 1, because line numbers start at 1
-            self.elems[3] = DataSpecs.num_col_dict[new_col] + str(new_line)
+            self.elems[3] = DataSpecs.col_list[new_col] + str(new_line)
 
     @staticmethod
     def reverse_square(square):

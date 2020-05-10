@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from poseval.common.transformations import DataSpecs, Fen, AlreadyWhiteError
+from poseval.common.transformations import DataSpecs, Fen
 
 
 def test_if_flipped_twice_produce_original_input():
@@ -71,7 +71,7 @@ def test_string_square_to_8x8():
     assert DataSpecs.string_square_to_8x8('a1') == (0, 0)
     assert DataSpecs.string_square_to_8x8('h8') == (7, 7)
     assert DataSpecs.string_square_to_8x8('e4') == (3, 4)  # unlike regular notation, we invoke lines first
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError):
         DataSpecs.string_square_to_8x8('E4')
 
 
@@ -116,4 +116,3 @@ def test_full_board_representation():
     np.testing.assert_array_equal(board[:, :, -1], fen.en_passant_vector_8x8x1().reshape(8, 8), verbose=True)
     np.testing.assert_array_equal(board[:, :, -3:-1], fen.castling_vector_8x8x2())
     np.testing.assert_array_equal(board[:, :, :-3], fen.pieces_dense_representation(12))
-
