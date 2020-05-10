@@ -3,7 +3,7 @@ import re
 import numpy as np
 
 
-class MalformedFenstringError(Exception):
+class MalformedFenStringError(Exception):
     pass
 
 
