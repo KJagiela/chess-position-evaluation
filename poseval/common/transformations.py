@@ -122,8 +122,7 @@ class Fen:
 
     def flip_position(self):
         self.elems[0] = "/".join(
-            [''.join([self._reverse_piece(piece) for piece in line]) for line in self.elems[0].split("/")[::-1]]
-        )
+            ''.join([self._reverse_piece(piece) for piece in line]) for line in self.elems[0].split("/")[::-1])
 
     def flip_castling(self):
         if self.elems[2] == '-':
