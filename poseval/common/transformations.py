@@ -183,7 +183,7 @@ class Fen:
         raw_board = self.raw_board()
         row = 0
         column = 0
-        vector = [0 for _ in range(0, 8 * 8 * layers)]
+        vector = [0] * (8 * 8 * layers)
         for c in raw_board:
             if c.isdigit():
                 column = column + int(c)
